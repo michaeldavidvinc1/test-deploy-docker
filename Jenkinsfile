@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Clone Repo') {
             steps {
-                git branch: 'main', url: 'https://github.com/USERNAME/REPO.git'
+                git branch: 'main', url: 'https://github.com/michaeldavidvinc1/test-deploy-docker.git'
             }
         }
 
@@ -18,7 +18,7 @@ pipeline {
             steps {
                 script {
                     sh "docker build -t $DOCKER_IMAGE:latest ."
-                    sh "docker login -u YOUR_DOCKERHUB_USERNAME -p YOUR_DOCKERHUB_PASSWORD"
+                    sh "docker login -u michaeldavidvinc -p M1ch43l1810."
                     sh "docker push $DOCKER_IMAGE:latest"
                 }
             }
