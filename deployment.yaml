@@ -1,32 +1,10 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: mywebsite
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: mywebsite
-  template:
-    metadata:
-      labels:
-        app: mywebsite
-    spec:
-      containers:
-      - name: mywebsite
-        image: mywebsite
-        ports:
-        - containerPort: 3001
----
 apiVersion: v1
-kind: Service
+kind: Pod
 metadata:
-  name: mywebsite-service
-spec:
-  selector:
-    app: mywebsite
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 3001
-  type: LoadBalancer
+  name: pod-name
+spec: 
+  containers:
+    - name: mywebsite
+      image: mywebsite
+      ports:
+        - containerPort: 3001
