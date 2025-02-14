@@ -3,4 +3,4 @@ WORKDIR /app
 COPY . .
 RUN npm install
 CMD ["node", "app.js"]
-EXPOSE 3001
+EXPOSE 3000
