@@ -21,7 +21,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: node-app-service
+  name: node-app
 spec:
   type: LoadBalancer
   selector:
