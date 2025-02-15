@@ -1,12 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: node-app
+  name: test-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: node-app
+      app: test-app
   template:
     metadata:
       labels:
@@ -21,12 +21,32 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: node-app
+  name: test-app-service
 spec:
-  type: LoadBalancer
   selector:
-    app: node-app
+    app: test-app
   ports:
   - protocol: TCP
     port: 80
     targetPort: 3000
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-app-ingress
+  labels:
+    name: test-app-ingress
+spec:
+  rules:
+  - host: test.michaeldavidvinc.my.id
+    http:
+      paths:
+      - path: "/"
+        backend:
+          service:
+            name: test-app-service
+            port: 
+              number: 80
+
