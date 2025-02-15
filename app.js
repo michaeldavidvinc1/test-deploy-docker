@@ -5,7 +5,7 @@ const port = 3000;
 const server = http.createServer((req, res) => {
     res.statusCode = 200;
     res.setHeader("Content-Type", 'text/plain');
-    res.end('Helllo World Jenkins')
+    res.end('Helllo World Kubernetes and Docker')
 })
 
 server.listen(port, hostname, () => {
