@@ -1,0 +1,40 @@
+name: Deploy ke Kubernetes  # Nama workflow
+
+on:
+  push:
+    branches:
+      - master  # Workflow akan berjalan setiap kali ada push ke branch `main`
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest  # Menjalankan job di lingkungan Linux terbaru
+
+    steps:
+      # Step 1: Checkout Repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4  # Mengambil kode terbaru dari repository GitHub
+
+      # Step 2: Login ke Docker Hub (atau registry lain seperti GHCR, AWS ECR)
+      - name: Login ke Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      # Step 3: Build dan Push Docker Image
+      - name: Build dan Push Docker Image
+        run: |
+          IMAGE_NAME=michaeldavidvinc/test-app  # Ganti dengan nama aplikasi di Docker Hub
+          VERSION=latest  # Bisa diganti dengan tag berdasarkan commit ID: $(git rev-parse --short HEAD)
+          docker build -t $IMAGE_NAME:$VERSION .
+          docker push $IMAGE_NAME:$VERSION
+
+      # Step 4: Setup Kubeconfig (Kubernetes Authentication)
+      - name: Set up Kubectl
+        run: |
+          echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig  # Menggunakan kubeconfig dari GitHub Secrets
+          export KUBECONFIG=kubeconfig  # Menjadikan kubeconfig sebagai config aktif
+
+      # Step 5: Deploy ke Kubernetes
+      - name: Update Kubernetes Deployment
+        run: |
+          kubectl apply -f production.yaml  # Menerapkan deployment baru
+          kubectl set image deployment/test-app test-app=michaeldavidvinc/test-app:latest  # Update image versi terbaru
+          kubectl rollout status deployment/test-app  # Menunggu update selesai
