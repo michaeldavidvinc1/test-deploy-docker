@@ -1,4 +1,4 @@
-name: Deploy to Kubernetes
+name: Deploy to VPS
 
 on:
   push:
@@ -10,40 +10,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Login to Docker Hub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+      - name: Build Docker Image
+        run: |
+          docker build -t michaeldavidvinc/test-app:latest .
 
-    - name: Build and Push Docker Image
-      run: |
-        IMAGE_TAG=latest
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/test-app:$IMAGE_TAG .
-        docker push ${{ secrets.DOCKER_USERNAME }}/test-app:$IMAGE_TAG
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
-    - name: Deploy to VPS via SSH
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_KEY }}
-        script: |
-          echo "Pulling latest image..."
-          docker pull ${{ secrets.DOCKER_USERNAME }}/test-app:latest
-          
-          echo "Updating Kubernetes deployment..."
-          kubectl set image deployment/test-app test-app=${{ secrets.DOCKER_USERNAME }}/test-app:latest --record
-          
-          echo "Restarting pod..."
-          kubectl rollout restart deployment test-app
+      - name: Push Docker Image
+        run: docker push michaeldavidvinc/test-app:latest
 
-    - name: Verify Deployment
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_KEY }}
-        script: |
-          echo "Checking pod status..."
-          kubectl get pods -o wide
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            kubectl set image deployment/test-app test-app=michaeldavidvinc/test-app:latest --record
+            kubectl rollout restart deployment test-app
+            kubectl get pods -o wide
