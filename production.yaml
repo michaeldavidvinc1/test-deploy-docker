@@ -13,8 +13,8 @@ spec:
         app: node-app
     spec:
       containers:
-      - name: node-app
-        image: michaeldavidvinc/node-app:latest
+      - name: test-app
+        image: michaeldavidvinc/test-app:latest
         ports:
         - containerPort: 3000
 ---
